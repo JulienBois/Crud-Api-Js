@@ -1,7 +1,9 @@
 const User = require('../models/userModel');
 const jwt = require("jsonwebtoken");
-
-exports.userRegister = (req, res) => {
+const bcrypt = require('bcrypt');
+exports.userRegister = async (req, res) => {
+    let salt = await bcrypt.genSalt();
+    req.body.password = await bcrypt.hash(req.body.password, salt);
     let newUser = new User(req.body);
 
     newUser.save((error, user) => {
@@ -29,8 +31,8 @@ exports.loginRegister = (req, res) => {
             res.json({ message: "Utilisateur non trouvé" });
         }
         else {
-            // User found
-            if (user.email == req.body.email && user.password == req.body.password) {
+            // User found 
+            if (user.email == req.body.email && bcrypt.compare(user.password,req.body.password)) {
                 // Password correct
                 let userData = {
                     id: user._id,
@@ -38,15 +40,15 @@ exports.loginRegister = (req, res) => {
                     role: "admin"
                 }
                 jwt.sign(userData, process.env.JWT_KEY, { expiresIn: "30 days" }, (error, token) => {
-                    if(error) {
+                    if (error) {
                         res.status(500);
                         console.log(error);
-                        res.json({message: "Impossible de générer le token"});
+                        res.json({ message: "Impossible de générer le token" });
 
                     }
                     else {
                         res.status(200);
-                        res.json({token});
+                        res.json({ token });
                     }
                 })
             }
