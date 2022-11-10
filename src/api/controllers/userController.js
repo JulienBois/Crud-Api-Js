@@ -23,7 +23,7 @@ exports.userRegister = async (req, res) => {
 
 exports.loginRegister = (req, res) => {
     // Find user
-    User.findOne({ email: req.body.email }, (error, user) => {
+    User.findOne({ email: req.body.email }, async (error, user) => {
         // If user not found
         if (error) {
             res.status(500);
@@ -32,7 +32,8 @@ exports.loginRegister = (req, res) => {
         }
         else {
             // User found 
-            if (user.email == req.body.email && bcrypt.compare(user.password,req.body.password)) {
+            const mdpBon = await bcrypt.compare(req.body.password,user.password);
+            if (mdpBon) {
                 // Password correct
                 let userData = {
                     id: user._id,
