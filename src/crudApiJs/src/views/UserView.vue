@@ -53,7 +53,8 @@ export default {
       this.$router.push("/");
     },
     async getPosts() {
-      await axios.get("http://localhost:3000/posts").then((response) => {
+      let headers = { "authorization": localStorage.getItem("token") };
+      await axios.get("http://localhost:3000/posts", { headers }).then((response) => {
         this.posts = response.data;
         console.log(this.posts);
       }).catch((error) => {
